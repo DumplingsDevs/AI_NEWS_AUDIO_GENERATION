@@ -3,7 +3,7 @@
     "Values": {
         "AzureWebJobsStorage": "UseDevelopmentStorage=true",
         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-        "AiNewsOptions:OpenAiKey": "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",
+        "AiNewsOptions:OpenAiKey": "",
         "AiNewsOptions:OpenAiUrl": "https://api.openai.com"
     }
 }
