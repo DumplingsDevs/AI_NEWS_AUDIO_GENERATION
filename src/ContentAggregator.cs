@@ -1,4 +1,4 @@
-namespace AINewsAudioGeneration;
+namespace function;
 
 internal class ContentAggregator
 {
@@ -9,7 +9,6 @@ internal class ContentAggregator
 
         foreach (var chunk in chunks)
         {
-            //TODO: Configure from appsettings?
             if (tempText.Length + chunk.Length < 4095)
             {
                 tempText += (chunk);
