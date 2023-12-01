@@ -9,7 +9,7 @@ namespace AiNews;
 public static class GenerateAudio
 {
     [Function("GenerateAudio")]
-    public static HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestData req,
+    public static HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "generateAudio")] HttpRequestData req,
         FunctionContext executionContext)
     {
         var logger = executionContext.GetLogger("GenerateAudio");
