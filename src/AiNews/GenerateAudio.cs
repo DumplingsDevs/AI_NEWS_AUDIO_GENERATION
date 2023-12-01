@@ -12,36 +12,22 @@ namespace AiNews;
 
 public class GenerateAudio
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger _logger;
-    private readonly AiNewsOptions _options;
+    private readonly IOpenAiClient _openAiClient;
+    private readonly ILogger<GenerateAudio> _logger;
 
-    public GenerateAudio(IHttpClientFactory httpClientFactory, ILogger logger, AiNewsOptions options)
+    public GenerateAudio(IOpenAiClient openAiClient, ILogger<GenerateAudio> logger)
     {
-        _httpClientFactory = httpClientFactory;
+        _openAiClient = openAiClient;
         _logger = logger;
-        _options = options;
     }
 
     [Function("GenerateAudio")]
     public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req, [FromBody] AudioGenerateDto dto)
     {
-        var httpClient = GetClient();
-            
         var audioResults = await Task.WhenAll(ContentAggregator.GetContentsForAudio(dto.Input, dto.Separator, 4095).Select(
-            async x => await OpenAiClient.GetAudio(httpClient, x)));
+            async x => await _openAiClient.GetAudio(x)));
 
         var responseBytes = audioResults.SelectMany(x => x).ToArray();
-            
         return await req.GetFileResponseAsync(responseBytes);
-    }
-    
-    private HttpClient GetClient()
-    {
-        var httpClient = _httpClientFactory.CreateClient("OpenAI");
-        httpClient.BaseAddress = new Uri(_options.OpenAiUrl);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.OpenAiKey);
-
-        return httpClient;
     }
 }
