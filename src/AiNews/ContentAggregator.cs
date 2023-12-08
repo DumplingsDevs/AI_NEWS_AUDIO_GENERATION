@@ -1,6 +1,6 @@
-namespace function;
+namespace AiNews;
 
-internal class ContentAggregator
+internal static class ContentAggregator
 {
     public static IEnumerable<string> GetContentsForAudio(string input, string separator, int maxContentLength)
     {

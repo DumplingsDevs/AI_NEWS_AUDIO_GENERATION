@@ -1,7 +1,7 @@
 using System.Net;
 using Microsoft.Azure.Functions.Worker.Http;
 
-namespace function.Extensions;
+namespace AiNews.Extensions;
 
 public static class HttpRequestDataExtensions
 {

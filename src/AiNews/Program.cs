@@ -1,13 +1,17 @@
-using function;
+using AiNews.Asp;
+using AiNews.Extensions;
+using AiNews.OpenAI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
-    .ConfigureServices(services =>
+    .ConfigureFunctionsWorkerDefaults(
+        builder => { builder.UseMiddleware<ExceptionLoggingMiddleware>(); }
+    ).ConfigureServices(services =>
     {
         services.AddHttpClient();
+        services.AddScoped<IOpenAiClient, OpenAiClient>();
         services.AddOptions<AiNewsOptions>()
             .Configure<IConfiguration>((settings, configuration) =>
             {
@@ -15,4 +19,5 @@ var host = new HostBuilder()
             });
     })
     .Build();
+
 host.Run();

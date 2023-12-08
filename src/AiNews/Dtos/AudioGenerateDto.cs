@@ -1,4 +1,4 @@
-namespace function;
+namespace AiNews.Dtos;
 
 public record AudioGenerateDto
 {
