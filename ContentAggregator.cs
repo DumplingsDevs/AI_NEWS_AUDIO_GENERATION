@@ -16,7 +16,7 @@ internal class ContentAggregator
             else
             {
                 yield return tempText;
-                tempText = "";
+                tempText = chunk;
             }
         }
 
