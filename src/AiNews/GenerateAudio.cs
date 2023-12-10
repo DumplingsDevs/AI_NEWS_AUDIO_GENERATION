@@ -33,16 +33,21 @@ public class GenerateAudio
 
     private async Task<byte[]> GetAudio(string input, string separator)
     {
-        var articles = ContentAggregator.GetContentsForAudio(input, separator, 4095).AsParallel().AsOrdered();
-        var audioResults = new ConcurrentBag<byte[]>();
+        var articles = ContentAggregator.GetContentsForAudio(input, separator, 4095);
+        using var pool = new SemaphoreSlim(initialCount: 3, maxCount: 3);
 
-        var options = new ParallelOptions() { MaxDegreeOfParallelism = 3 };
-        await Parallel.ForEachAsync(articles, options, async (article, cancellationToken) =>
-        {
-            var audio = await _openAiClient.GetAudio(article);
-            audioResults.Add(audio);
-        });
+        var audioResults = await Task.WhenAll(articles.Select(
+            async x =>
+            {
+                await pool.WaitAsync();
 
+                var result = await _openAiClient.GetAudio(x);
+
+                pool.Release();
+
+                return result;
+            }));
+        
         return audioResults.SelectMany(x => x).ToArray();
     }
 }
