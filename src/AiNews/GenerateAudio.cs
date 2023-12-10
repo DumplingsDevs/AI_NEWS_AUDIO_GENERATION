@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Headers;
@@ -22,12 +23,26 @@ public class GenerateAudio
     }
 
     [Function("GenerateAudio")]
-    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req, [FromBody] AudioGenerateDto dto)
+    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req,
+        [FromBody] AudioGenerateDto dto)
     {
-        var audioResults = await Task.WhenAll(ContentAggregator.GetContentsForAudio(dto.Input, dto.Separator, 4095).Select(
-            async x => await _openAiClient.GetAudio(x)));
+        var responseBytes = await GetAudio(dto.Input, dto.Separator);
 
-        var responseBytes = audioResults.SelectMany(x => x).ToArray();
         return await req.GetFileResponseAsync(responseBytes);
+    }
+
+    private async Task<byte[]> GetAudio(string input, string separator)
+    {
+        var articles = ContentAggregator.GetContentsForAudio(input, separator, 4095).AsParallel().AsOrdered();
+        var audioResults = new ConcurrentBag<byte[]>();
+
+        var options = new ParallelOptions() { MaxDegreeOfParallelism = 3 };
+        await Parallel.ForEachAsync(articles, options, async (article, cancellationToken) =>
+        {
+            var audio = await _openAiClient.GetAudio(article);
+            audioResults.Add(audio);
+        });
+
+        return audioResults.SelectMany(x => x).ToArray();
     }
 }
