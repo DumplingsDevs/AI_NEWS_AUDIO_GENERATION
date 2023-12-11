@@ -34,7 +34,7 @@ public class GenerateAudio
     private async Task<byte[]> GetAudio(string input, string separator)
     {
         var articles = ContentAggregator.GetContentsForAudio(input, separator, 4095);
-        using var pool = new SemaphoreSlim(initialCount: 3, maxCount: 3);
+        using var pool = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
         var audioResults = await Task.WhenAll(articles.Select(
             async x =>
