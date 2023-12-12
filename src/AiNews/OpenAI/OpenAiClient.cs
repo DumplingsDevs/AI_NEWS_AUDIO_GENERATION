@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using AiNews.Extensions;
+using AiNews.OpenAI.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -12,7 +13,8 @@ internal class OpenAiClient : IOpenAiClient
     private readonly ILogger<OpenAiClient> _logger;
     private readonly AiNewsOptions _options;
 
-    public OpenAiClient(IHttpClientFactory httpClientFactory, ILogger<OpenAiClient> logger, IOptions<AiNewsOptions> options)
+    public OpenAiClient(IHttpClientFactory httpClientFactory, ILogger<OpenAiClient> logger,
+        IOptions<AiNewsOptions> options)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
@@ -22,7 +24,7 @@ internal class OpenAiClient : IOpenAiClient
     public async Task<byte[]> GetAudio(string input)
     {
         var httpClient = GetClient();
-        
+
         var requestData = new
         {
             model = "tts-1-hd",
@@ -35,17 +37,18 @@ internal class OpenAiClient : IOpenAiClient
         {
             return await response.Content.ReadAsByteArrayAsync();
         }
-        
+
         _logger.LogError($"ErrorCode from OpenAI: {response.StatusCode} {await response.Content.ReadAsStringAsync()}");
-        throw new Exception($"ErrorCode from OpenAI: {response.StatusCode} {await response.Content.ReadAsStringAsync()}");
+
+        throw new OpenAiException(response.StatusCode, await response.Content.ReadAsStringAsync());
     }
-    
+
     private HttpClient GetClient()
     {
         var httpClient = _httpClientFactory.CreateClient("OpenAI");
         httpClient.BaseAddress = new Uri(_options.OpenAiUrl);
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.OpenAiKey);
-        
+
         return httpClient;
     }
 }

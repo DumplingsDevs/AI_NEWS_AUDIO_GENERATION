@@ -1,3 +1,4 @@
+using AiNews;
 using AiNews.Asp;
 using AiNews.Extensions;
 using AiNews.OpenAI;
@@ -12,6 +13,7 @@ var host = new HostBuilder()
     {
         services.AddHttpClient();
         services.AddScoped<IOpenAiClient, OpenAiClient>();
+        services.AddScoped<IAudioGenerationService, OpenAiAudioGenerationService>();
         services.AddOptions<AiNewsOptions>()
             .Configure<IConfiguration>((settings, configuration) =>
             {
