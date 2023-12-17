@@ -2,6 +2,8 @@ using AiNews.Dtos;
 using AiNews.Exceptions;
 using AiNews.Extensions;
 using AiNews.OpenAI;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -18,14 +20,15 @@ public class GenerateAudio
     }
 
     [Function("GenerateAudio")]
-    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequestData req,
-        [FromBody] AudioGenerateDto dto)
+    public async Task<IResult> Run([HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequest req)
     {
-        var generationResult = await GetAudio(dto.Input, dto.Separator, dto.AudioProviderName);
+        AudioGenerateDto dto = await AudioGenerateDto.CreateAsync(req);
+        return Results.Ok();
+        // var generationResult = await GetAudio("dto.Input", "dto.Separator", "dto.AudioProviderName");
 
-        return await req.GetFileResponseAsync(generationResult.Audio, generationResult.Format);
+        // return await req.GetFileResponseAsync(generationResult.Audio, generationResult.Format);
     }
-
+    
     private async Task<AudioGenerationResult> GetAudio(string input, string separator, string providerName)
     {
         var service = _audioGenerationServices.FirstOrDefault(x =>
