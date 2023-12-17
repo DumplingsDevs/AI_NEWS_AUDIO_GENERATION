@@ -10,14 +10,16 @@ internal class OpenAiAudioGenerationService : IAudioGenerationService
     private readonly IOpenAiClient _openAiClient;
 
     public string Type => "OpenAI";
-    
+
     public OpenAiAudioGenerationService(IOpenAiClient openAiClient)
     {
         this._openAiClient = openAiClient;
     }
-    
-    public async Task<AudioGenerationResult> GetAudio(IEnumerable<string> contents)
+
+    public async Task<AudioGenerationResult> GetAudio(Func<int, IEnumerable<string>> getContent, string providerPayload)
     {
+        var contents = getContent(4095);
+
         var policy = GetResiliencePolicy();
 
         var jobs = contents.Select(
@@ -30,9 +32,9 @@ internal class OpenAiAudioGenerationService : IAudioGenerationService
         var audioResults = await Task.WhenAll(jobs);
         var audio = audioResults.SelectMany(x => x).ToArray();
 
-        return new AudioGenerationResult(audio, "flac");
+        return new AudioGenerationResult(audio, "mp3");
     }
-    
+
     private static AsyncPolicyWrap GetResiliencePolicy()
     {
         var rateLimit = Policy.RateLimitAsync(1, TimeSpan.FromMinutes(1), 3);
