@@ -2,6 +2,6 @@ namespace AiNews;
 
 public interface IAudioGenerationService
 {
-    Task<byte[]> GetAudio(IEnumerable<string> contents);
+    Task<AudioGenerationResult> GetAudio(IEnumerable<string> contents);
     string Type { get; }
 }

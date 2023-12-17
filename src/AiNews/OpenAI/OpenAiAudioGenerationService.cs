@@ -16,7 +16,7 @@ internal class OpenAiAudioGenerationService : IAudioGenerationService
         this._openAiClient = openAiClient;
     }
     
-    public async Task<byte[]> GetAudio(IEnumerable<string> contents)
+    public async Task<AudioGenerationResult> GetAudio(IEnumerable<string> contents)
     {
         var policy = GetResiliencePolicy();
 
@@ -28,8 +28,9 @@ internal class OpenAiAudioGenerationService : IAudioGenerationService
         );
 
         var audioResults = await Task.WhenAll(jobs);
+        var audio = audioResults.SelectMany(x => x).ToArray();
 
-        return audioResults.SelectMany(x => x).ToArray();
+        return new AudioGenerationResult(audio, "flac");
     }
     
     private static AsyncPolicyWrap GetResiliencePolicy()

@@ -10,25 +10,23 @@ namespace AiNews;
 
 public class GenerateAudio
 {
-    private readonly ILogger<GenerateAudio> _logger;
     private readonly IEnumerable<IAudioGenerationService> _audioGenerationServices;
 
-    public GenerateAudio(ILogger<GenerateAudio> logger, IEnumerable<IAudioGenerationService> audioGenerationServices)
+    public GenerateAudio(IEnumerable<IAudioGenerationService> audioGenerationServices)
     {
-        _logger = logger;
         _audioGenerationServices = audioGenerationServices;
     }
 
     [Function("GenerateAudio")]
-    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req,
+    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequestData req,
         [FromBody] AudioGenerateDto dto)
     {
-        var responseBytes = await GetAudio(dto.Input, dto.Separator, dto.AudioProviderName);
+        var generationResult = await GetAudio(dto.Input, dto.Separator, dto.AudioProviderName);
 
-        return await req.GetFileResponseAsync(responseBytes);
+        return await req.GetFileResponseAsync(generationResult.Audio, generationResult.Format);
     }
 
-    private async Task<byte[]> GetAudio(string input, string separator, string providerName)
+    private async Task<AudioGenerationResult> GetAudio(string input, string separator, string providerName)
     {
         var service = _audioGenerationServices.FirstOrDefault(x =>
             x.Type.Equals(providerName, StringComparison.InvariantCultureIgnoreCase));
