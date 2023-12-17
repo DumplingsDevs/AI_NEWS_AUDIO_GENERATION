@@ -1,4 +1,4 @@
-namespace AiNews.OpenAI;
+namespace AiNews.AudioProviders.OpenAI;
 
 public interface IOpenAiClient
 {

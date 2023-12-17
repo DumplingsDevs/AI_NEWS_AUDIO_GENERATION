@@ -1,7 +1,7 @@
 using AiNews;
 using AiNews.Asp;
+using AiNews.AudioProviders.OpenAI;
 using AiNews.Extensions;
-using AiNews.OpenAI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

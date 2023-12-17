@@ -1,11 +1,11 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using AiNews.AudioProviders.OpenAI.Exceptions;
 using AiNews.Extensions;
-using AiNews.OpenAI.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AiNews.OpenAI;
+namespace AiNews.AudioProviders.OpenAI;
 
 internal class OpenAiClient : IOpenAiClient
 {

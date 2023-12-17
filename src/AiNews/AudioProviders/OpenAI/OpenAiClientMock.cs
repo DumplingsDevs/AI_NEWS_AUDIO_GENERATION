@@ -1,11 +1,9 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using AiNews.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AiNews.OpenAI;
+namespace AiNews.AudioProviders.OpenAI;
 
 /// <summary>
 /// Used for tests

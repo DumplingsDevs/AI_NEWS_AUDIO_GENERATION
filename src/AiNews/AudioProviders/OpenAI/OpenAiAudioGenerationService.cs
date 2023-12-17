@@ -1,9 +1,9 @@
-using AiNews.OpenAI.Exceptions;
+using AiNews.AudioProviders.OpenAI.Exceptions;
 using Polly;
 using Polly.RateLimit;
 using Polly.Wrap;
 
-namespace AiNews.OpenAI;
+namespace AiNews.AudioProviders.OpenAI;
 
 internal class OpenAiAudioGenerationService : IAudioGenerationService
 {
