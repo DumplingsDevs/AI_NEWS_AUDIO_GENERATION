@@ -1,19 +1,20 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using AiNews.AudioProviders.OpenAI;
 using AiNews.AudioProviders.OpenAI.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AiNews.AudioProviders.OpenAI;
+namespace AiNews.AudioProviders.ElevenLabs;
 
-internal class OpenAiClient : IOpenAiClient
+internal class ElevenLabsClient : IElevenLabsClient
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<OpenAiClient> _logger;
-    private readonly OpenAiOptions _options;
+    private readonly ILogger<ElevenLabsClient> _logger;
+    private readonly ElevenLabsOptions _options;
 
-    public OpenAiClient(IHttpClientFactory httpClientFactory, ILogger<OpenAiClient> logger,
-        IOptions<OpenAiOptions> options)
+    public ElevenLabsClient(IHttpClientFactory httpClientFactory, ILogger<ElevenLabsClient> logger,
+        IOptions<ElevenLabsOptions> options)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
@@ -26,12 +27,18 @@ internal class OpenAiClient : IOpenAiClient
 
         var requestData = new
         {
-            model = "tts-1-hd",
-            voice = "nova",
-            input,
+            model_id = _options.ModelId,
+            text = input,
+            voice_settings = new
+            {
+                similarity_boost = _options.SimilarityBoost,
+                stability = _options.Stability,
+                style = _options.Style,
+                use_speaker_boost = _options.UseSpeakerBoost
+            }
         };
 
-        using var response = await httpClient.PostAsJsonAsync("/v1/audio/speech", requestData);
+        using var response = await httpClient.PostAsJsonAsync($"/v1/text-to-speech/vsqTqurA65sbFvOYeEmi", requestData);
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadAsByteArrayAsync();
@@ -44,9 +51,9 @@ internal class OpenAiClient : IOpenAiClient
 
     private HttpClient GetClient()
     {
-        var httpClient = _httpClientFactory.CreateClient("OpenAI");
+        var httpClient = _httpClientFactory.CreateClient("ElevenLabs");
         httpClient.BaseAddress = new Uri(_options.ApiUrl);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
+        httpClient.DefaultRequestHeaders.Add("xi-api-key", _options.ApiKey);
 
         return httpClient;
     }

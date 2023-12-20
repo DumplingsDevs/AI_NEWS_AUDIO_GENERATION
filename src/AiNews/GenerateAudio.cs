@@ -16,21 +16,17 @@ public class GenerateAudio
     }
 
     [Function("GenerateAudio")]
-    public async Task<FileContentResult> Run([HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequest req)
+    public async Task<FileContentResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req,
+        AudioGenerateDto dto)
     {
-        AudioGenerateDto dto = await AudioGenerateDto.CreateAsync(req);
-        
-        var generationResult = await GetAudio(dto.Input, dto.Separator, dto.AudioProviderName, dto.AudioProviderPayload);
-        var audioWithIntro = new List<byte[]> { dto.Intro, generationResult.Audio };
-        var completedAudio = audioWithIntro.SelectMany(x => x).ToArray();
+        var generationResult =
+            await GetAudio(dto.Input, dto.Separator, dto.AudioProviderName, dto.AudioProviderPayload);
 
-        return new FileContentResult(completedAudio, "application/octet-stream")
-        {
-            FileDownloadName = $"output_{DateTime.Now:HH_mm_ss_d_M_y}.{generationResult.Format}"
-        };
+        return FileResult(generationResult);
     }
 
-    private async Task<AudioGenerationResult> GetAudio(string input, string separator, string providerName, string providerPayload)
+    private async Task<AudioGenerationResult> GetAudio(string input, string separator, string providerName,
+        string providerPayload)
     {
         var service = _audioGenerationServices.FirstOrDefault(x =>
             x.Type.Equals(providerName, StringComparison.InvariantCultureIgnoreCase));
@@ -40,6 +36,15 @@ public class GenerateAudio
             throw new AudioProviderNotSupported(providerName);
         }
 
-        return await service.GetAudio(maxChunk => ContentAggregator.GetContentsForAudio(input, separator, maxChunk), providerPayload);
+        return await service.GetAudio(maxChunk => ContentAggregator.GetContentsForAudio(input, separator, maxChunk),
+            providerPayload);
+    }
+
+    private static FileContentResult FileResult(AudioGenerationResult generationResult)
+    {
+        return new FileContentResult(generationResult.Audio, "application/octet-stream")
+        {
+            FileDownloadName = $"output_{DateTime.Now:HH_mm_ss_d_M_y}.{generationResult.Format}"
+        };
     }
 }
