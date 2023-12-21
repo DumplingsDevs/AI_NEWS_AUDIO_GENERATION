@@ -1,20 +1,19 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using AiNews.Extensions;
-using AiNews.OpenAI.Exceptions;
+using AiNews.AudioProviders.OpenAI.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AiNews.OpenAI;
+namespace AiNews.AudioProviders.OpenAI;
 
 internal class OpenAiClient : IOpenAiClient
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<OpenAiClient> _logger;
-    private readonly AiNewsOptions _options;
+    private readonly OpenAiOptions _options;
 
     public OpenAiClient(IHttpClientFactory httpClientFactory, ILogger<OpenAiClient> logger,
-        IOptions<AiNewsOptions> options)
+        IOptions<OpenAiOptions> options)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
@@ -46,8 +45,8 @@ internal class OpenAiClient : IOpenAiClient
     private HttpClient GetClient()
     {
         var httpClient = _httpClientFactory.CreateClient("OpenAI");
-        httpClient.BaseAddress = new Uri(_options.OpenAiUrl);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.OpenAiKey);
+        httpClient.BaseAddress = new Uri(_options.ApiUrl);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
 
         return httpClient;
     }

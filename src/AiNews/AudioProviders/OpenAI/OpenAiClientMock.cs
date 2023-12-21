@@ -1,11 +1,8 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
-using AiNews.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AiNews.OpenAI;
+namespace AiNews.AudioProviders.OpenAI;
 
 /// <summary>
 /// Used for tests
@@ -13,9 +10,9 @@ namespace AiNews.OpenAI;
 internal class OpenAiClientMock : IOpenAiClient
 {
     private readonly ILogger<OpenAiClientMock> _logger;
-    private readonly AiNewsOptions _options;
+    private readonly OpenAiOptions _options;
     private static int Counter = 0;
-    public OpenAiClientMock(ILogger<OpenAiClientMock> logger, IOptions<AiNewsOptions> options)
+    public OpenAiClientMock(ILogger<OpenAiClientMock> logger, IOptions<OpenAiOptions> options)
     {
         _logger = logger;
         _options = options.Value;

@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace AiNews.OpenAI.Exceptions;
+namespace AiNews.AudioProviders.OpenAI.Exceptions;
 
 internal class OpenAiException : Exception
 {
