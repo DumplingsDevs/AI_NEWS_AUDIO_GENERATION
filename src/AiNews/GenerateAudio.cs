@@ -16,9 +16,9 @@ public class GenerateAudio
     }
 
     [Function("GenerateAudio")]
-    public async Task<FileContentResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req,
-        AudioGenerateDto dto)
+    public async Task<FileContentResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req)
     {
+        var dto = await req.ReadFromJsonAsync<AudioGenerateDto>();
         var generationResult =
             await GetAudio(dto.Input, dto.Separator, dto.AudioProviderName, dto.AudioProviderPayload);
 
@@ -26,7 +26,7 @@ public class GenerateAudio
     }
 
     private async Task<AudioGenerationResult> GetAudio(string input, string separator, string providerName,
-        string providerPayload)
+        object providerPayload)
     {
         var service = _audioGenerationServices.FirstOrDefault(x =>
             x.Type.Equals(providerName, StringComparison.InvariantCultureIgnoreCase));

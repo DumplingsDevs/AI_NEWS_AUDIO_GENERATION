@@ -1,6 +1,4 @@
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using AiNews.AudioProviders.OpenAI;
 using AiNews.AudioProviders.OpenAI.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -21,24 +19,24 @@ internal class ElevenLabsClient : IElevenLabsClient
         _options = options.Value;
     }
 
-    public async Task<byte[]> GetAudio(string input)
+    public async Task<byte[]> GetAudio(string input, ElevenLabsPayload payload)
     {
         var httpClient = GetClient();
-
+        
         var requestData = new
         {
-            model_id = _options.ModelId,
+            model_id = payload.ModelId,
             text = input,
             voice_settings = new
             {
-                similarity_boost = _options.SimilarityBoost,
-                stability = _options.Stability,
-                style = _options.Style,
-                use_speaker_boost = _options.UseSpeakerBoost
+                similarity_boost = payload.SimilarityBoost,
+                stability = payload.Stability,
+                style = payload.Style,
+                use_speaker_boost = payload.UseSpeakerBoost
             }
         };
-
-        using var response = await httpClient.PostAsJsonAsync($"/v1/text-to-speech/vsqTqurA65sbFvOYeEmi", requestData);
+        
+        using var response = await httpClient.PostAsJsonAsync($"/v1/text-to-speech/{payload.VoiceId}?output_format=mp3_44100_192", requestData);
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadAsByteArrayAsync();
@@ -52,6 +50,7 @@ internal class ElevenLabsClient : IElevenLabsClient
     private HttpClient GetClient()
     {
         var httpClient = _httpClientFactory.CreateClient("ElevenLabs");
+        httpClient.Timeout = TimeSpan.FromMinutes(10);
         httpClient.BaseAddress = new Uri(_options.ApiUrl);
         httpClient.DefaultRequestHeaders.Add("xi-api-key", _options.ApiKey);
 

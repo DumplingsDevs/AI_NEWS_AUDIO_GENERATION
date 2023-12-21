@@ -1,5 +1,6 @@
-using AiNews.AudioProviders.OpenAI;
+using System.Text.Json;
 using AiNews.AudioProviders.OpenAI.Exceptions;
+using AiNews.Exceptions;
 using Polly;
 using Polly.RateLimit;
 using Polly.Wrap;
@@ -17,16 +18,23 @@ internal class ElevenLabsGenerationService : IAudioGenerationService
         this._elevenLabsClient = elevenLabsClient;
     }
 
-    public async Task<AudioGenerationResult> GetAudio(Func<int, IEnumerable<string>> getContent, string providerPayload)
+    public async Task<AudioGenerationResult> GetAudio(Func<int, IEnumerable<string>> getContent, object providerPayload)
     {
-        var contents = getContent(4999);
+        var payload = ((JsonElement)providerPayload).Deserialize<ElevenLabsPayload>();
+
+        if (payload is null)
+        {
+            throw new CannotDeserializePayloadException(((JsonElement)providerPayload).GetString(), "ElevenLabs");
+        }
+
+        var contents = getContent(0).Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
 
         var policy = GetResiliencePolicy();
 
         var jobs = contents.Select(
             async x
                 => await policy.ExecuteAsync(async ()
-                    => await _elevenLabsClient.GetAudio(x)
+                    => await _elevenLabsClient.GetAudio(x, payload)
                 )
         );
 
@@ -38,7 +46,7 @@ internal class ElevenLabsGenerationService : IAudioGenerationService
 
     private static AsyncPolicyWrap GetResiliencePolicy()
     {
-        var rateLimit = Policy.RateLimitAsync(1, TimeSpan.FromMinutes(1), 3);
+        var rateLimit = Policy.RateLimitAsync(1, TimeSpan.FromMinutes(1), 20);
         var rateLimitPolicy = Policy.Handle<RateLimitRejectedException>()
             .WaitAndRetryAsync(100, _ => TimeSpan.FromSeconds(2))
             .WrapAsync(rateLimit);

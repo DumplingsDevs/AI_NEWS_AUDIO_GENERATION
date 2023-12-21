@@ -16,7 +16,7 @@ internal class OpenAiAudioGenerationService : IAudioGenerationService
         this._openAiClient = openAiClient;
     }
 
-    public async Task<AudioGenerationResult> GetAudio(Func<int, IEnumerable<string>> getContent, string providerPayload)
+    public async Task<AudioGenerationResult> GetAudio(Func<int, IEnumerable<string>> getContent, object providerPayload)
     {
         var contents = getContent(4095);
 
