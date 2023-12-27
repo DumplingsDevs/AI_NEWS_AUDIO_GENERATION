@@ -24,6 +24,16 @@ public class GenerateAudio
 
         return FileResult(generationResult);
     }
+    
+    [Function("GenerateAudioV2")]
+    public async Task<FileContentResult> RunV2([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
+    {
+        var dto = await req.ReadFromJsonAsync<AudioGenerateDto>();
+        var generationResult =
+            await GetAudio(dto.Input, dto.Separator, dto.AudioProviderName, dto.AudioProviderPayload);
+
+        return FileResult(generationResult);
+    }
 
     private async Task<AudioGenerationResult> GetAudio(string input, string separator, string providerName,
         object providerPayload)
