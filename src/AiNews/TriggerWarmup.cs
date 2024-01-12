@@ -9,7 +9,7 @@ namespace AiNews;
 public class TriggerWarmup
 {
     [Function("TriggerWarmup")]
-    public IResult Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+    public IResult Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
     {
         return Results.Ok("Warmed up");
     }
