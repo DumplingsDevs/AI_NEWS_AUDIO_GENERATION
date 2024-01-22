@@ -20,7 +20,7 @@ internal class ElevenLabsGenerationService : IAudioGenerationService
 
     public async Task<AudioGenerationResult> GetAudio(Func<int, IEnumerable<string>> getContent, object providerPayload)
     {
-        var payload = ((JsonElement)providerPayload).Deserialize<ElevenLabsPayload>();
+        var payload = ((JsonElement)providerPayload).Deserialize<ElevenLabsPayload>(new JsonSerializerOptions() { PropertyNameCaseInsensitive = true});
 
         if (payload is null)
         {
