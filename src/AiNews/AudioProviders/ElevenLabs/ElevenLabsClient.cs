@@ -36,7 +36,7 @@ internal class ElevenLabsClient : IElevenLabsClient
             }
         };
         
-        using var response = await httpClient.PostAsJsonAsync($"/v1/text-to-speech/{payload.VoiceId}?output_format=mp3_44100_192", requestData);
+        using var response = await httpClient.PostAsJsonAsync($"/v1/text-to-speech/{payload.VoiceId}?output_format=mp3_44100_128", requestData);
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadAsByteArrayAsync();
