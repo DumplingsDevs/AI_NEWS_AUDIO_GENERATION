@@ -19,14 +19,16 @@ internal class ElevenLabsClient : IElevenLabsClient
         _options = options.Value;
     }
 
-    public async Task<byte[]> GetAudio(string input, ElevenLabsPayload payload)
+    public async Task<byte[]> GetAudio(string? previousText, string currentText, string? nextText, ElevenLabsPayload payload)
     {
         var httpClient = GetClient();
         
         var requestData = new
         {
             model_id = payload.ModelId,
-            text = input,
+            text = currentText,
+            previous_text = previousText,
+            next_text = nextText,
             voice_settings = new
             {
                 similarity_boost = payload.SimilarityBoost,
@@ -39,10 +41,11 @@ internal class ElevenLabsClient : IElevenLabsClient
         using var response = await httpClient.PostAsJsonAsync($"/v1/text-to-speech/{payload.VoiceId}?output_format=mp3_44100_128", requestData);
         if (response.IsSuccessStatusCode)
         {
+            _logger.LogInformation("ElevenLabs Request success with parameters: {@RequestData}", requestData);
             return await response.Content.ReadAsByteArrayAsync();
         }
 
-        _logger.LogError($"ErrorCode from OpenAI: {response.StatusCode} {await response.Content.ReadAsStringAsync()}");
+        _logger.LogError("ErrorCode from OpenAI: {StatusCode} {Response}", response.StatusCode, await response.Content.ReadAsStringAsync());
 
         throw new OpenAiException(response.StatusCode, await response.Content.ReadAsStringAsync());
     }
