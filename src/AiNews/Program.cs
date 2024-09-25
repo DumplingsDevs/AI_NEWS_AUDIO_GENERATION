@@ -16,16 +16,18 @@ var host = new HostBuilder()
         services.AddScoped<IElevenLabsClient, ElevenLabsClient>();
         services.AddScoped<IAudioGenerationService, OpenAiAudioGenerationService>();
         services.AddScoped<IAudioGenerationService, ElevenLabsGenerationService>();
-        services.AddOptions<OpenAiOptions>()
-            .Configure<IConfiguration>((settings, configuration) =>
-            {
-                configuration.GetSection("OpenAiOptions").Bind(settings);
-            });
-        services.AddOptions<ElevenLabsOptions>()
-            .Configure<IConfiguration>((settings, configuration) =>
-            {
-                configuration.GetSection("ElevenLabsOptions").Bind(settings);
-            });
+        
+        services.Configure<OpenAiOptions>(options =>
+        {
+            options.ApiKey = "";
+            options.ApiUrl = "https://api.openai.com";
+        });
+
+        services.Configure<ElevenLabsOptions>(options =>
+        {
+            options.ApiKey = "";
+            options.ApiUrl = "https://api.elevenlabs.io";
+        });
     })
     .Build();
 
